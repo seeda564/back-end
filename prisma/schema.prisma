@@ -1,0 +1,254 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  CUSTUMER
+  TRANSPORTER
+}
+
+model User {
+  id          Int          @id @default(autoincrement())
+  email       String       @unique
+  password    String
+  role        Role         @default(CUSTUMER)
+  custumer    custumer?
+  transporter transporter?
+}
+
+model admin {
+  id       Int    @id @default(autoincrement())
+  email    String @unique
+  password String
+  username String
+}
+
+model Company {
+  id          Int    @id @default(autoincrement())
+  companyName String @default(" SAS logistics")
+  address     String @default(" 1st Floor, 5th Main, ryah, Saudi Arabia, 560034")
+  phone       String @default("0123456789")
+  zipcode     String @default("+966")
+}
+
+model custumer {
+  id   Int    @id @default(autoincrement())
+  name String
+
+  country      String
+  profileimage String
+
+  address        String?
+  phone          String?
+  createdAt      DateTime         @default(now())
+  user           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId         Int              @unique
+  status         stat             @default(ACTIVE)
+  shipmentdetail shipmentdetail[]
+}
+
+enum stat {
+  ACTIVE
+  INACTIVE
+}
+
+model transporter {
+  id                  Int       @id @default(autoincrement())
+  name                String    @unique
+  phone               String
+  companyName         String
+  yearsInBusiness     Int?
+  cargoType           String
+  goodCategory        String
+  profileimage        String
+  businessDescription String?
+  address             String?
+  country             String
+  state               String
+  city                String
+  createdAt           DateTime  @default(now())
+  user                User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId              Int       @unique
+  status              stat      @default(ACTIVE)
+  truck               truck[]
+  driver              driver[]
+  journey             journey[]
+  quate               quate[]
+  image               String?
+}
+
+model cargoType {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  createdAt DateTime @default(now())
+}
+
+model truck {
+  id          Int     @id @default(autoincrement())
+  name        String?
+  image       String?
+  trucknumber String  @unique
+  make        String?
+  capacity    String?
+  color       String
+  cargoType   String?
+  other       String
+
+  createdAt     DateTime    @default(now())
+  transporter   transporter @relation(fields: [transporterId], references: [id], onDelete: Cascade)
+  transporterId Int
+  status        stat        @default(ACTIVE)
+}
+
+model driver {
+  id            Int         @id @default(autoincrement())
+  name          String      @unique
+  address       String?
+  phone         String?
+  email         String      @unique
+  image         String?
+  licence       String
+  howlong       String
+  createdAt     DateTime    @default(now())
+  transporter   transporter @relation(fields: [transporterId], references: [id], onDelete: Cascade)
+  transporterId Int
+
+  status stat @default(ACTIVE)
+}
+
+model catogry {
+  id             Int              @id @default(autoincrement())
+  name           String           @unique
+  image          String
+  createdAt      DateTime         @default(now())
+  shipmentdetail shipmentdetail[]
+}
+
+model journey {
+  id              Int         @id @default(autoincrement())
+  title           String
+  fromLocation    String
+  toLocation      String
+  createdAt       DateTime    @default(now())
+  transportername String
+  transporter     transporter @relation(fields: [transporterId], references: [id], onDelete: Cascade)
+  transporterId   Int
+  status          stat        @default(ACTIVE)
+}
+
+model country {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  state     state[]
+  createdAt DateTime @default(now())
+}
+
+model city {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  state     state    @relation(fields: [stateId], references: [id],onDelete: Cascade)
+  stateId   Int
+  createdAt DateTime @default(now())
+}
+
+model state {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  createdAt DateTime @default(now())
+
+  city      city[]
+  country   country? @relation(fields: [countryId], references: [id],onDelete: Cascade)
+  countryId Int?
+}
+
+model shipment {
+  id               Int            @id @default(autoincrement())
+  shipmentdetail   shipmentdetail @relation(fields: [shipmentdetailId], references: [id] , onDelete: Cascade)
+  quate            quate          @relation(fields: [quateId], references: [id])
+  quateId          Int            @unique
+  shipmentdetailId Int            @unique
+  transporterId    Int
+  custumerId       Int
+  createdAt        DateTime       @default(now())
+  status           stat           @default(ACTIVE)
+}
+
+model shipmentAndQuate {
+  id               Int            @id @default(autoincrement())
+  shipmentdetail   shipmentdetail @relation(fields: [shipmentdetailId], references: [id] , onDelete: Cascade)
+  quate            quate          @relation(fields: [quateId], references: [id] , onDelete: Cascade)
+  quateId          Int            @unique
+  shipmentdetailId Int
+  createdAt        DateTime       @default(now())
+  status           stat           @default(ACTIVE)
+}
+
+model quate {
+  id               Int                @id @default(autoincrement())
+  name             String
+  amount           String
+  description      String
+  shipmentdetailId  Int                
+    createdAt        DateTime           @default(now())
+  transporter      transporter        @relation(fields: [transporterId], references: [id], onDelete: Cascade)
+  transporterId    Int
+  shipment         shipment[]
+  shipmentAndQuate shipmentAndQuate[]
+  status           stat               @default(ACTIVE)
+  driverId         Int
+  truckId          Int
+}
+
+model shipmentdetail {
+  id               Int        @id @default(autoincrement())
+  name             String
+  catogry          catogry?   @relation(fields: [catogryId], references: [id] , onDelete: Cascade)
+  catogryId        Int
+  catname          String
+  
+  itemId           Int?
+  freight          freight?   @relation(fields: [freightId], references: [id] , onDelete: Cascade)
+  freightId        Int?
+  fri              String
+  pickupDate       DateTime
+  image            String?
+  pickupPlace      String
+  distinationPlace String
+  createdAt        DateTime   @default(now())
+  shipment         shipment[]
+  custumer         custumer?  @relation(fields: [custumerId], references: [id])
+  custumerId       Int
+  status           stat       @default(ACTIVE)
+  shipmentAndQuate shipmentAndQuate[]
+  delveredTo       String
+  delvPhone        String
+}
+
+model freight {
+  id             Int              @id @default(autoincrement())
+  name           String
+  shipmentdetail shipmentdetail[]
+}
+
+model item {
+  id          Int      @id @default(autoincrement())
+  name        String
+  quantity    String
+  hight       String?
+  width       String?
+  weight      String?
+  discription String?
+  createdAt   DateTime @default(now())
+
+}
