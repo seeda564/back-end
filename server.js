@@ -40,8 +40,10 @@ app.use("/api/country", countryRoute);
 app.use("/api/shipment", shipmentRoute);
 
 app.use("/trans", transRoute2);
-
 //server start
+app.use("/", (req, res) => {
+  res.status(404).json({ error: "page not found" });
+});
 app.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`);
 });

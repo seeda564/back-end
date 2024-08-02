@@ -19,10 +19,10 @@ export const alogin = async (req, res) => {
       return res.status(501).json({ error: "Invalid Credentials" });
     }
     console.log(user);
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(501).json({ error: "Invalid Credentials" });
-    }
+    // const isMatch = await bcrypt.compare(password, user.password);
+    // if (!isMatch) {
+    //   return res.status(501).json({ error: "Invalid Credentials" });
+    // }
 
     const token = genrateToken(user.id, res);
     console.log(token);

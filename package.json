@@ -7,7 +7,8 @@
   "scripts": {
     "dev": "nodemon server.js",
     "start": "node server.js",
-    "admin": "node Controller/AdminCon/createAdmin.js"
+    "admin": "node Controller/AdminCon/createAdmin.js",
+    "build": "prisma generate && prisma migrate deploy"
   },
   "keywords": [
     "back-end",
@@ -26,7 +27,8 @@
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "jsonwebtoken": "^9.0.2",
-    "nodemon": "^3.1.4"
+    "nodemon": "^3.1.4",
+    "vercel": "^35.2.2"
   },
   "devDependencies": {
     "prisma": "^5.16.1"
